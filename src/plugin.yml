@@ -1,0 +1,10 @@
+name: PyxisCore
+main: com.andrewyunt.pyxiscore.PyxisCore
+version: 1.1
+depend: [Vault]
+commands:
+  paths:
+    description: Pulls up a UI menu so you can select your paths.
+    aliases: [path]
+  bankdialog:
+    description: Opens the bank conversation for the tellers.

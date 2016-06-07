@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_pyxiscore" default="compile.module.pyxiscore">
+  <dirname property="module.pyxiscore.basedir" file="${ant.file.module_pyxiscore}"/>
+  
+  <property name="module.jdk.home.pyxiscore" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.pyxiscore" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.pyxiscore" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.pyxiscore" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="pyxiscore.output.dir" value="${module.pyxiscore.basedir}/../out/production/PyxisCore"/>
+  <property name="pyxiscore.testoutput.dir" value="${module.pyxiscore.basedir}/../out/test/PyxisCore"/>
+  
+  <path id="pyxiscore.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="pyxiscore.module.production.classpath">
+    <path refid="${module.jdk.classpath.pyxiscore}"/>
+    <pathelement location="${basedir}/../Desktop/Jars/Vault.jar"/>
+    <pathelement location="${basedir}/../Desktop/Jars/spigot-1.9.4.jar"/>
+  </path>
+  
+  <path id="pyxiscore.runtime.production.module.classpath">
+    <pathelement location="${pyxiscore.output.dir}"/>
+    <pathelement location="${basedir}/../Desktop/Jars/Vault.jar"/>
+    <pathelement location="${basedir}/../Desktop/Jars/spigot-1.9.4.jar"/>
+  </path>
+  
+  <path id="pyxiscore.module.classpath">
+    <path refid="${module.jdk.classpath.pyxiscore}"/>
+    <pathelement location="${pyxiscore.output.dir}"/>
+    <pathelement location="${basedir}/../Desktop/Jars/Vault.jar"/>
+    <pathelement location="${basedir}/../Desktop/Jars/spigot-1.9.4.jar"/>
+  </path>
+  
+  <path id="pyxiscore.runtime.module.classpath">
+    <pathelement location="${pyxiscore.testoutput.dir}"/>
+    <pathelement location="${pyxiscore.output.dir}"/>
+    <pathelement location="${basedir}/../Desktop/Jars/Vault.jar"/>
+    <pathelement location="${basedir}/../Desktop/Jars/spigot-1.9.4.jar"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.pyxiscore">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.pyxiscore">
+    <patternset refid="excluded.from.module.pyxiscore"/>
+  </patternset>
+  
+  <path id="pyxiscore.module.sourcepath">
+    <dirset dir="${module.pyxiscore.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.pyxiscore" depends="compile.module.pyxiscore.production,compile.module.pyxiscore.tests" description="Compile module PyxisCore"/>
+  
+  <target name="compile.module.pyxiscore.production" depends="register.custom.compilers" description="Compile module PyxisCore; production classes">
+    <mkdir dir="${pyxiscore.output.dir}"/>
+    <javac2 destdir="${pyxiscore.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.pyxiscore}/javac">
+      <compilerarg line="${compiler.args.pyxiscore}"/>
+      <bootclasspath refid="pyxiscore.module.bootclasspath"/>
+      <classpath refid="pyxiscore.module.production.classpath"/>
+      <src refid="pyxiscore.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.pyxiscore"/>
+    </javac2>
+    
+    <copy todir="${pyxiscore.output.dir}">
+      <fileset dir="${module.pyxiscore.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.pyxiscore.tests" depends="register.custom.compilers,compile.module.pyxiscore.production" description="compile module PyxisCore; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.pyxiscore" description="cleanup module">
+    <delete dir="${pyxiscore.output.dir}"/>
+    <delete dir="${pyxiscore.testoutput.dir}"/>
+  </target>
+</project>

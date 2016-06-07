@@ -1,0 +1,182 @@
+paths_menu_size: 27
+Paths:
+  Politician:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 2
+  Mayor:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 11
+  Emperor:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 20
+  Miner:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 3
+  Lumberjack:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 12
+  Craftsman:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 21
+  Businessman:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 4
+  Trader:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 13
+  CEO:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 22
+  Agrarian:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 5
+  Harvester:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 14
+  Soldier:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 6
+  Mercenary:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 15
+  Knight:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 24
+  Mage:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 7
+  Acolyte:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 16
+  Wizard:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 25
+  Thief:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 8
+  Rogue:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 17
+  Ninja:
+    cost: 2500
+    required_group: ""
+    icon:
+      material: CLAY
+      data: 0
+      name: ""
+      lore: {}
+      slot: 26
