@@ -1,8 +1,13 @@
 package com.andrewyunt.pyxiscore.listeners;
 
 import com.andrewyunt.pyxiscore.PyxisCore;
+import com.andrewyunt.pyxiscore.player.PyxisPlayer;
 import com.andrewyunt.pyxiscore.utilities.Utils;
-import org.bukkit.*;
+import com.codingforcookies.armorequip.ArmorEquipEvent;
+import org.bukkit.ChatColor;
+import org.bukkit.CropState;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -11,12 +16,15 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.Inventory;
@@ -38,6 +46,7 @@ public class PlayerEventListener implements Listener {
         Block block = event.getBlock();
 
         if(block.getType().equals(Material.MOB_SPAWNER)) {
+
             if (!player.getWorld().getEnvironment().equals(Environment.NETHER))
                 return;
 
@@ -46,7 +55,9 @@ public class PlayerEventListener implements Listener {
 
             event.setCancelled(true); // Cancel the block place event
             player.sendMessage(ChatColor.RED + "You are not allowed to place spawners in the Nether.");
+
         } else if(block.getType() == Material.CROPS || block.getType() == Material.CARROT_STICK || block.getType() == Material.POTATO) {
+
             if(!(PyxisCore.perms.playerInGroup(player, "Agrarian")))
                 return;
 
@@ -81,6 +92,9 @@ public class PlayerEventListener implements Listener {
         Player player = (Player) event.getWhoClicked();
 
         Inventory inv = event.getClickedInventory();
+
+        if(inv == null)
+            return;
 
         if(inv.getType() == InventoryType.BREWING) {
             if (!(PyxisCore.perms.playerInGroup(player, "Rogue"))) {
@@ -137,6 +151,7 @@ public class PlayerEventListener implements Listener {
                 if ((itemType == Material.DIAMOND_PICKAXE || itemType == Material.DIAMOND_AXE || itemType == Material.DIAMOND_HOE || itemType == Material.DIAMOND_SPADE || itemType == Material.DIAMOND_SWORD
                         || itemType == Material.DIAMOND_HELMET || itemType == Material.DIAMOND_CHESTPLATE || itemType == Material.DIAMOND_LEGGINGS || itemType == Material.DIAMOND_BOOTS)
                         && !(PyxisCore.perms.playerInGroup((Player) he, "Craftsman"))) {
+
                     event.getInventory().setResult(new ItemStack(Material.AIR));
                     he.sendMessage(ChatColor.RED + "You must unlock the Craftsman path before crafting this item.");
                 }
@@ -177,12 +192,41 @@ public class PlayerEventListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
 
+        Block block = event.getBlock();
+
+        Player player = event.getPlayer();
+
+        Material type = player.getInventory().getItemInMainHand().getType();
+
+        if(type == Material.DIAMOND_AXE || type == Material.DIAMOND_PICKAXE) {
+
+            if(!(PyxisCore.perms.playerInGroup(player, "Craftsman"))) {
+                player.sendMessage(ChatColor.RED + "You must unlock the Craftsman path to use a diamond axe or diamond pickaxe.");
+                event.setCancelled(true);
+            }
+
+            return;
+
+        } else if(type == Material.DIAMOND_SPADE || type == Material.DIAMOND_HOE) {
+
+            if(!(PyxisCore.perms.playerInGroup(player, "Harvester"))) {
+                player.sendMessage(ChatColor.RED + "You must unlock the Harvester path to use a diamond hoe or shovel.");
+                event.setCancelled(true);
+            }
+
+        } else if(type == Material.DIAMOND_SWORD) {
+
+            if(!(PyxisCore.perms.playerInGroup(player, "Ninja"))) {
+                player.sendMessage(ChatColor.RED + "You must unlock the Ninja path to use a diamond sword.");
+                event.setCancelled(true);
+            }
+        }
+
         if(!(PyxisCore.perms.playerInGroup(event.getPlayer(), "Harvester")))
             return;
 
-        Block block = event.getBlock();
-
         if(block.getType() == Material.CROPS) {
+
             if(block.getData() == CropState.RIPE.getData()) {
                 ItemStack is = new ItemStack(Material.WHEAT);
 
@@ -190,7 +234,9 @@ public class PlayerEventListener implements Listener {
 
                 loc.getWorld().dropItemNaturally(loc, is);
             }
+
         } else if(block.getType() == Material.CARROT_STICK || block.getType() == Material.POTATO) {
+
             if(block.getData() == CropState.RIPE.getData()) {
                 int rand = (int) Math.round(2 + (Math.random() * (3 - 2)));
 
@@ -205,7 +251,9 @@ public class PlayerEventListener implements Listener {
 
                 loc.getWorld().dropItemNaturally(loc, is);
             }
+
         } else if(block.getType() == Material.BEETROOT_BLOCK || block.getType() == Material.MELON_BLOCK) {
+
             int rand = (int) Math.round(2 + (Math.random() * (5 - 2)));
 
             ItemStack is;
@@ -218,6 +266,137 @@ public class PlayerEventListener implements Listener {
             Location loc = block.getLocation();
 
             loc.getWorld().dropItemNaturally(loc, is);
+        }
+    }
+
+    @EventHandler
+    public void onArmorEquip(ArmorEquipEvent event) {
+
+        if(event.getNewArmorPiece().getType() == Material.DIAMOND_HELMET || event.getNewArmorPiece().getType() == Material.DIAMOND_CHESTPLATE ||
+                event.getNewArmorPiece().getType() == Material.DIAMOND_LEGGINGS || event.getNewArmorPiece().getType() == Material.DIAMOND_BOOTS) {
+
+            Player player = event.getPlayer();
+
+            if(!(PyxisCore.perms.playerInGroup(player, "Knight"))) {
+                event.setCancelled(true);
+                player.sendMessage(ChatColor.RED + "You must unlock the Knight path to equip diamond armor.");
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+
+        Player player = event.getPlayer();
+
+        ItemStack item = event.getItem();
+
+        if(item == null)
+            return;
+
+        Material type = item.getType();
+
+        if(type == Material.DIAMOND_HOE) {
+            if(!(PyxisCore.perms.playerInGroup(player, "Harvester")))
+                if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                    player.sendMessage(ChatColor.RED + "You must unlock the Harvester path to use a diamond hoe.");
+                    event.setCancelled(true);
+                }
+            return;
+        }
+
+        if(!(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK))
+            return;
+
+        if(!(type == Material.PAPER))
+            return;
+
+        if(!(item.hasItemMeta()))
+            return;
+
+        String displayName = item.getItemMeta().getDisplayName();
+
+        PyxisPlayer pp = PyxisCore.plugin.playerManagerInstance.getPlayer(player);
+
+        if(displayName.equals(ChatColor.GOLD + "Lightning Spell")) {
+
+            int lightningCooldown = pp.getLightningCooldown();
+
+            if(lightningCooldown > 0) {
+                player.sendMessage(String.format(ChatColor.RED + "You must wait %s seconds before using the lightning spell again.", lightningCooldown));
+                return;
+            }
+
+            pp.setLightningCooldown(25);
+
+        } else if(displayName.equals(ChatColor.RED + "Fireball Spell")) {
+
+            int fireballCooldown = pp.getFireballCooldown();
+
+            if(fireballCooldown > 0) {
+                player.sendMessage(String.format(ChatColor.RED + "You must wait %s seconds before using the fireball spell again.", fireballCooldown));
+                return;
+            }
+
+
+
+            pp.setFireballCooldown(10);
+
+        } else if(displayName.equals(ChatColor.AQUA + "Ice Lance Spell")) {
+
+            int icelanceCooldown = pp.getIcelanceCooldown();
+
+            if(icelanceCooldown > 0) {
+                player.sendMessage(String.format(ChatColor.RED + "You must wait %s seconds before using that spell again.", icelanceCooldown));
+                return;
+            }
+
+            pp.setIcelanceCooldown(15);
+        }
+    }
+
+    @EventHandler
+    public void onEntityDamageEntity(EntityDamageByEntityEvent event) {
+
+        Entity damager = event.getDamager();
+
+        if(!(damager instanceof Player))
+            return;
+
+        Player player = (Player) damager;
+
+        Material type = player.getInventory().getItemInMainHand().getType();
+
+        if(type == Material.DIAMOND_SWORD && !(PyxisCore.perms.playerInGroup(player, "Ninja"))) {
+            player.sendMessage(ChatColor.RED + "You must unlock the Ninja path to attack using a diamond sword.");
+            event.setCancelled(true);
+        }
+
+        Entity entity = event.getEntity();
+
+        if(!(entity instanceof Player))
+            return;
+
+        player = (Player) entity;
+
+        if(PyxisCore.perms.playerInGroup(player, "Rogue")) {
+            double random = Math.random();
+
+            if(random <= 0.1) {
+                damager.sendMessage(ChatColor.RED + "Your attack was dodged by " + player.getName());
+                player.sendMessage(ChatColor.GREEN + "You dodged the attack by " + damager.getName());
+                event.setCancelled(true);
+            }
+        } else if(PyxisCore.perms.playerInGroup(player, "Ninja")) {
+            double random = Math.random();
+
+            if(random <= 0.15) {
+                ((Player) damager).sendMessage(ChatColor.RED + "Your attack was dodged by " + player.getName());
+                player.sendMessage(ChatColor.GREEN + "You dodged the attack by " + damager.getName());
+                event.setCancelled(true);
+
+                event.setCancelled(true);
+            }
         }
     }
 }

@@ -24,9 +24,9 @@ public class Recipes {
         return recipe;
     }
 
-    public static ShapelessRecipe getAcolyteSpellRecipe() {
+    public static ShapelessRecipe getAcolyteSpellRecipeCoal() {
 
-        ItemStack is = new ItemStack(Material.FIREBALL);
+        ItemStack is = new ItemStack(Material.PAPER);
         ItemMeta meta = is.getItemMeta();
 
         meta.setDisplayName(ChatColor.RED + "Fireball Spell");
@@ -36,6 +36,22 @@ public class Recipes {
 
         recipe.addIngredient(Material.PAPER);
         recipe.addIngredient(Material.COAL);
+
+        return recipe;
+    }
+
+    public static ShapelessRecipe getAcolyteSpellRecipeCharcoal() {
+
+        ItemStack is = new ItemStack(Material.PAPER);
+        ItemMeta meta = is.getItemMeta();
+
+        meta.setDisplayName(ChatColor.RED + "Fireball Spell");
+        is.setItemMeta(meta);
+
+        ShapelessRecipe recipe = new ShapelessRecipe(is);
+
+        recipe.addIngredient(Material.PAPER);
+        recipe.addIngredient(Material.COAL, (short) 1);
 
         return recipe;
     }

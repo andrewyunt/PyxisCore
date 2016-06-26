@@ -1,4 +1,8 @@
+# All blocks with an inventory or any blocks that when right clicked shouldn't equip armor.
+blocked: {}
+# Size of the paths GUI menu
 paths_menu_size: 27
+# Paths displayed in the GUI menu
 Paths:
   Politician:
     cost: 2500

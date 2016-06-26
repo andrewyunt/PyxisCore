@@ -5,6 +5,7 @@ import com.andrewyunt.pyxiscore.listeners.TownyEventListener;
 import com.andrewyunt.pyxiscore.menus.PathsMenuGUI;
 import com.andrewyunt.pyxiscore.player.PlayerManager;
 import com.andrewyunt.pyxiscore.player.PyxisPlayer;
+import com.codingforcookies.armorequip.ArmorListener;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;
@@ -13,6 +14,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -24,15 +26,12 @@ public class PyxisCore extends JavaPlugin {
 	
 	public static Economy economy = null;
 	public static Permission perms = null;
-
 	public PlayerManager playerManagerInstance = new PlayerManager();
-
 	public FileConfiguration config = getConfig();
-
 	private Logger logger = getLogger();
-
 	public Server server = getServer();
-	
+	public PluginManager pm = server.getPluginManager();
+
 	@Override
 	public void onEnable() {
 		
@@ -45,11 +44,16 @@ public class PyxisCore extends JavaPlugin {
 
 		saveDefaultConfig();
 
-		server.getPluginManager().registerEvents(new PlayerEventListener(), this);
-		server.getPluginManager().registerEvents(new TownyEventListener(), this);
+		// Register events for Borlea ArmorEquipEvent
+		pm.registerEvents(new ArmorListener(getConfig().getStringList("blocked")), this);
+
+		// Register plugin specific events
+		pm.registerEvents(new PlayerEventListener(), this);
+		pm.registerEvents(new TownyEventListener(), this);
 
 		server.addRecipe(Recipes.getMageSpellRecipe());
-		server.addRecipe(Recipes.getAcolyteSpellRecipe());
+		server.addRecipe(Recipes.getAcolyteSpellRecipeCoal());
+		server.addRecipe(Recipes.getAcolyteSpellRecipeCharcoal());
 		server.addRecipe(Recipes.getWizardSpellRecipe());
 	}
 
