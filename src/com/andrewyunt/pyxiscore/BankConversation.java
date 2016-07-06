@@ -20,7 +20,7 @@ public class BankConversation implements ConversationAbandonedListener {
 
         prompt = 1;
 
-        conversationFactory = new ConversationFactory(PyxisCore.plugin)
+        conversationFactory = new ConversationFactory(PyxisCore.getInstance())
                 .withModality(true)
                 .withFirstPrompt(new CommandPrompt())
                 .withEscapeSequence("quit")

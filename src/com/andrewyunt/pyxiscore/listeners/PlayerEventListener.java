@@ -4,6 +4,8 @@ import com.andrewyunt.pyxiscore.PyxisCore;
 import com.andrewyunt.pyxiscore.player.PyxisPlayer;
 import com.andrewyunt.pyxiscore.utilities.Utils;
 import com.codingforcookies.armorequip.ArmorEquipEvent;
+import com.palmergames.bukkit.towny.object.TownBlock;
+import com.palmergames.bukkit.towny.object.TownyUniverse;
 import org.bukkit.ChatColor;
 import org.bukkit.CropState;
 import org.bukkit.Location;
@@ -11,9 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -24,12 +24,14 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.util.Vector;
+
+import java.util.Set;
 
 public class PlayerEventListener implements Listener {
 
@@ -91,6 +93,11 @@ public class PlayerEventListener implements Listener {
 
         Player player = (Player) event.getWhoClicked();
 
+        PyxisPlayer pp = PyxisCore.getInstance().getPlayerManagerInstance().getPlayer(player);
+
+        if(pp.isFrozen())
+            event.setCancelled(true);
+
         Inventory inv = event.getClickedInventory();
 
         if(inv == null)
@@ -119,11 +126,11 @@ public class PlayerEventListener implements Listener {
             return;
         }
 
-        ConfigurationSection section = PyxisCore.plugin.config.getConfigurationSection("Paths");
+        ConfigurationSection section = PyxisCore.getInstance().getConfig().getConfigurationSection("Paths");
 
         for(String pathName : section.getKeys(false))
             if (ChatColor.translateAlternateColorCodes('&', section.getConfigurationSection(pathName).getString("icon.name")).equals(meta.getDisplayName())) {
-                PyxisCore.plugin.playerManagerInstance.getPlayer(player).getPathsMenu().selectedPath(pathName);
+                PyxisCore.getInstance().getPlayerManagerInstance().getPlayer(player).getPathsMenu().selectedPath(pathName);
                 break;
             }
 
@@ -138,7 +145,7 @@ public class PlayerEventListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
 
-        PyxisCore.plugin.playerManagerInstance.addPlayer(event.getPlayer());
+        PyxisCore.getInstance().getPlayerManagerInstance().addPlayer(event.getPlayer());
     }
 
     @EventHandler
@@ -308,7 +315,7 @@ public class PlayerEventListener implements Listener {
         if(!(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK))
             return;
 
-        if(!(type == Material.PAPER))
+        if(!(type == Material.PAPER) )
             return;
 
         if(!(item.hasItemMeta()))
@@ -316,9 +323,15 @@ public class PlayerEventListener implements Listener {
 
         String displayName = item.getItemMeta().getDisplayName();
 
-        PyxisPlayer pp = PyxisCore.plugin.playerManagerInstance.getPlayer(player);
+        PyxisPlayer pp = PyxisCore.getInstance().getPlayerManagerInstance().getPlayer(player);
 
         if(displayName.equals(ChatColor.GOLD + "Lightning Spell")) {
+
+            if(!(PyxisCore.perms.playerInGroup(player, "Acolyte"))) {
+                player.sendMessage(ChatColor.RED + "You must unlock the Acolyte path to use the lightning spell.");
+                event.setCancelled(true);
+                return;
+            }
 
             int lightningCooldown = pp.getLightningCooldown();
 
@@ -327,9 +340,36 @@ public class PlayerEventListener implements Listener {
                 return;
             }
 
+            Block block = player.getTargetBlock((Set<Material>) null, 10);
+
+            TownBlock townBlock = TownyUniverse.getTownBlock(block.getLocation());
+
+            if(townBlock != null)
+                if(townBlock.hasTown() || townBlock.hasGuild())
+                    if(!(townBlock.isWarZone()))
+                        return;
+
+            block.getWorld().strikeLightning(block.getLocation());
+
+            player.sendMessage(ChatColor.YELLOW + "** You summon lightning from the skies! **");
+
             pp.setLightningCooldown(25);
 
+            BukkitScheduler scheduler = PyxisCore.getInstance().getServer().getScheduler();
+            scheduler.scheduleSyncRepeatingTask(PyxisCore.getInstance(), new Runnable() {
+                @Override
+                public void run() {
+                    pp.setLightningCooldown(pp.getLightningCooldown() - 1);
+                }
+            }, 0L, 20L);
+
         } else if(displayName.equals(ChatColor.RED + "Fireball Spell")) {
+
+            if(!(PyxisCore.perms.playerInGroup(player, "Mage"))) {
+                player.sendMessage(ChatColor.RED + "You must unlock the Mage path to use the fireball spell.");
+                event.setCancelled(true);
+                return;
+            }
 
             int fireballCooldown = pp.getFireballCooldown();
 
@@ -338,21 +378,33 @@ public class PlayerEventListener implements Listener {
                 return;
             }
 
+            Vector direction = player.getEyeLocation().getDirection().multiply(1);
 
+            Projectile  projectile = (Projectile) player.getWorld().spawn(player.getEyeLocation().add(direction.getX(), direction.getY(), direction.getZ()), Fireball.class);
+
+            projectile.setShooter(player);
+            projectile.setVelocity(direction);
+            projectile.setFireTicks(0);
+
+            ((Fireball) projectile).setIsIncendiary(false);
+
+            player.sendMessage(ChatColor.YELLOW + "** A fireball suddenly appears in front of you! **");
 
             pp.setFireballCooldown(10);
 
-        } else if(displayName.equals(ChatColor.AQUA + "Ice Lance Spell")) {
+            BukkitScheduler scheduler = PyxisCore.getInstance().getServer().getScheduler();
+            scheduler.scheduleSyncRepeatingTask(PyxisCore.getInstance(), new Runnable() {
+                @Override
+                public void run() {
 
-            int icelanceCooldown = pp.getIcelanceCooldown();
+                    pp.setFireballCooldown(pp.getFireballCooldown() - 1);
+                }
+            }, 0L, 20L);
 
-            if(icelanceCooldown > 0) {
-                player.sendMessage(String.format(ChatColor.RED + "You must wait %s seconds before using that spell again.", icelanceCooldown));
-                return;
-            }
+        } else
+            return;
 
-            pp.setIcelanceCooldown(15);
-        }
+        item.setAmount(item.getAmount() - 1);
     }
 
     @EventHandler
@@ -363,13 +415,13 @@ public class PlayerEventListener implements Listener {
         if(!(damager instanceof Player))
             return;
 
-        Player player = (Player) damager;
+        Player damagerPlayer = (Player) damager;
 
-        Material type = player.getInventory().getItemInMainHand().getType();
+        PyxisPlayer damagerPP = PyxisCore.getInstance().getPlayerManagerInstance().getPlayer(damagerPlayer);
 
-        if(type == Material.DIAMOND_SWORD && !(PyxisCore.perms.playerInGroup(player, "Ninja"))) {
-            player.sendMessage(ChatColor.RED + "You must unlock the Ninja path to attack using a diamond sword.");
+        if(damagerPP.isFrozen()) {
             event.setCancelled(true);
+            return;
         }
 
         Entity entity = event.getEntity();
@@ -377,26 +429,102 @@ public class PlayerEventListener implements Listener {
         if(!(entity instanceof Player))
             return;
 
-        player = (Player) entity;
+        Player player = (Player) entity;
+
+        ItemStack item = damagerPlayer.getInventory().getItemInMainHand();
+
+        if(item == null)
+            return;
+
+        Material type = item.getType();
+
+        if(type == Material.AIR)
+            return;
+
+        if(type == Material.IRON_SWORD) {
+
+            if(!(PyxisCore.perms.playerInGroup(damagerPlayer, "Wizard"))) {
+                damagerPlayer.sendMessage(ChatColor.RED + "You must unlock the Wiazrd path to use the ice lance.");
+                event.setCancelled(true);
+                return;
+            }
+
+            if(!(item.hasItemMeta()))
+                return;
+
+            PyxisPlayer pp = PyxisCore.getInstance().getPlayerManagerInstance().getPlayer(player);
+
+            int icelanceCooldown = pp.getIcelanceCooldown();
+
+            if(icelanceCooldown > 0) {
+                damagerPlayer.sendMessage(String.format(ChatColor.RED + "You must wait %s seconds before using the ice lance again.", icelanceCooldown));
+                return;
+            }
+
+            double random = Math.random();
+
+            if(!(random <= .1))
+                return;
+
+            damagerPlayer.sendMessage(String.format(ChatColor.AQUA + "** You freeze %s using your ice lance! **", player.getName()));
+            player.sendMessage(String.format(ChatColor.AQUA + "** %s freezes you using their ice lance! **", damagerPlayer.getName()));
+
+            pp.setIcelanceCooldown(15);
+
+            pp.setFrozen(true);
+
+            BukkitScheduler scheduler = PyxisCore.getInstance().getServer().getScheduler();
+            scheduler.scheduleSyncDelayedTask(PyxisCore.getInstance(), new Runnable() {
+                @Override
+                public void run() {
+                    pp.setFrozen(false);
+                }
+            }, 60L);
+
+        } else if(type == Material.DIAMOND_SWORD && !(PyxisCore.perms.playerInGroup(damagerPlayer, "Ninja"))) {
+
+            damagerPlayer.sendMessage(ChatColor.RED + "You must unlock the Ninja path to attack using a diamond sword.");
+            event.setCancelled(true);
+            return;
+        }
 
         if(PyxisCore.perms.playerInGroup(player, "Rogue")) {
+
             double random = Math.random();
 
-            if(random <= 0.1) {
-                damager.sendMessage(ChatColor.RED + "Your attack was dodged by " + player.getName());
-                player.sendMessage(ChatColor.GREEN + "You dodged the attack by " + damager.getName());
-                event.setCancelled(true);
-            }
+            if(!(random <= 0.1))
+                return;
+
         } else if(PyxisCore.perms.playerInGroup(player, "Ninja")) {
+
             double random = Math.random();
 
-            if(random <= 0.15) {
-                ((Player) damager).sendMessage(ChatColor.RED + "Your attack was dodged by " + player.getName());
-                player.sendMessage(ChatColor.GREEN + "You dodged the attack by " + damager.getName());
-                event.setCancelled(true);
+            if(!(random <= 0.15))
+                return;
+        } else
+            return;
 
-                event.setCancelled(true);
-            }
-        }
+        damagerPlayer.sendMessage(String.format(ChatColor.RED + "** Your attack is dodged by %s! **", player.getName()));
+        player.sendMessage(String.format(ChatColor.GREEN + "** You dodge the attack by %s **", damagerPlayer.getName()));
+
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+
+        PyxisPlayer pp = PyxisCore.getInstance().getPlayerManagerInstance().getPlayer(event.getPlayer());
+
+        if(pp.isFrozen())
+            event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+
+        PyxisPlayer pp = PyxisCore.getInstance().getPlayerManagerInstance().getPlayer(event.getPlayer());
+
+        if(pp.isFrozen())
+            event.setCancelled(true);
     }
 }

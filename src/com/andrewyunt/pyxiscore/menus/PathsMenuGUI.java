@@ -11,6 +11,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.List;
+
 public class PathsMenuGUI {
 
     private Inventory inv;
@@ -21,18 +23,30 @@ public class PathsMenuGUI {
 
         this.player = player;
 
-        inv = Bukkit.createInventory(null, PyxisCore.plugin.config.getInt("paths_menu_size"), ChatColor.BLACK + "Choose Your Paths");
+        inv = Bukkit.createInventory(null, PyxisCore.getInstance().getConfig().getInt("paths_menu_size"), ChatColor.BLACK + "Choose Your Paths");
 
-        ConfigurationSection section = PyxisCore.plugin.config.getConfigurationSection("Paths");
+        ConfigurationSection section = PyxisCore.getInstance().getConfig().getConfigurationSection("Paths");
 
         for(String path : section.getKeys(false)) {
             ItemStack is = new ItemStack(Material.getMaterial(section.getConfigurationSection(path).getString("icon.material")), 1,
                     (short) section.getConfigurationSection(path).getInt("icon.data"));
 
+            is = Utils.removeAttributes(is);
+
             ItemMeta meta = is.getItemMeta();
 
             meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getConfigurationSection(path).getString("icon.name")));
-            meta.setLore(Utils.colorizeStringList(section.getConfigurationSection(path).getStringList("icon.lore")));
+
+            List<String> lore = section.getConfigurationSection(path).getStringList("icon.lore");
+
+            lore.add("");
+
+            if(!(PyxisCore.perms.playerInGroup(player, path)))
+                lore.add("&7Price: " + String.valueOf(section.getConfigurationSection(path).getInt("cost")) + " PYX");
+            else
+                lore.add("&7PURCHASED");
+
+            meta.setLore(Utils.colorizeStringList(lore));
 
             is.setItemMeta(meta);
 
@@ -59,7 +73,7 @@ public class PathsMenuGUI {
             return;
         }
 
-        String requiredPathName = PyxisCore.plugin.config.getString("Paths." + pathName + ".required_group");
+        String requiredPathName = PyxisCore.getInstance().getConfig().getString("Paths." + pathName + ".required_group");
 
         if(!(requiredPathName == null) && !(requiredPathName.equals("")))
             if(!(PyxisCore.perms.playerInGroup(player, requiredPathName))) {
@@ -67,13 +81,16 @@ public class PathsMenuGUI {
                 return;
             }
 
-        if(PyxisCore.economy.getBalance(player) < PyxisCore.plugin.config.getDouble("Paths." + pathName + ".price")) {
+        int pathPrice = PyxisCore.getInstance().getConfig().getInt("Paths." + pathName + ".cost");
+
+        if(PyxisCore.economy.getBalance(player) < pathPrice) {
             player.sendMessage(ChatColor.GRAY + "You do not have enough PYX to afford that path.");
             return;
         }
 
+        PyxisCore.economy.withdrawPlayer(player, pathPrice);
+
         PyxisCore.perms.playerAddGroup(player, pathName);
-        player.sendMessage(ChatColor.DARK_GRAY + "[" + ChatColor.BLUE + "Pyxis" + ChatColor.GRAY + "Paths" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + "You have successfully purchased the " +
-                ChatColor.BLUE + pathName + ChatColor.GRAY + " path.");
+        player.sendMessage(ChatColor.GRAY + "You have successfully purchased the " + ChatColor.BLUE + pathName + ChatColor.GRAY + " path.");
     }
 }

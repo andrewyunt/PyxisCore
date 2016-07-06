@@ -16,8 +16,8 @@ public class TownyEventListener implements Listener {
         if(!(event.getRankName().equals("assistant")))
             return;
 
-        Player targetPlayer = PyxisCore.plugin.server.getPlayer(event.getResident().getName());
-        Player senderPlayer = PyxisCore.plugin.server.getPlayer(event.getSenderResident().getName());
+        Player targetPlayer = PyxisCore.getInstance().getServer().getPlayer(event.getResident().getName());
+        Player senderPlayer = PyxisCore.getInstance().getServer().getPlayer(event.getSenderResident().getName());
 
             if(!(PyxisCore.perms.playerInGroup(targetPlayer, "Politician"))) {
             TownyMessaging.sendErrorMsg(senderPlayer, "The resident " + targetPlayer.getName() + " does not have the politician path and may not hold the town assistant rank.");

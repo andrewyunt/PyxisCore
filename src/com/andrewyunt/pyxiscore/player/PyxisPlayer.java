@@ -8,6 +8,8 @@ public class PyxisPlayer {
 
     private int lightningCooldown = 0, fireballCooldown = 0, icelanceCooldown = 0;
 
+    private boolean isFrozen = false;
+
     public PathsMenuGUI getPathsMenu() {
 
         return pathsMenuInstance;
@@ -46,5 +48,15 @@ public class PyxisPlayer {
     public void setLightningCooldown(int lightningCooldown) {
 
         this.lightningCooldown = lightningCooldown;
+    }
+
+    public boolean isFrozen() {
+
+        return isFrozen;
+    }
+
+    public void setFrozen(boolean isFrozen) {
+
+        this.isFrozen = isFrozen;
     }
 }

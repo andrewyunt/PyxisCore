@@ -1,9 +1,10 @@
 package com.andrewyunt.pyxiscore.utilities;
 
-import net.minecraft.server.v1_9_R2.NBTTagCompound;
-import net.minecraft.server.v1_9_R2.NBTTagList;
+import net.minecraft.server.v1_10_R1.NBTTagCompound;
+import net.minecraft.server.v1_10_R1.NBTTagList;
 import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class Utils {
 
     public static ItemStack addGlow(ItemStack is) {
 
-        net.minecraft.server.v1_9_R2.ItemStack nmsItem = CraftItemStack.asNMSCopy(is);
+        net.minecraft.server.v1_10_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(is);
 
         NBTTagCompound nbt = nmsItem.getTag() == null ? new NBTTagCompound() : nmsItem.getTag();
 
@@ -40,6 +41,7 @@ public class Utils {
      * Code from method java.util.Collections.shuffle();
      */
     public static void shuffle(int[] array) {
+
         if (random == null) random = new Random();
         int count = array.length;
         for (int i = count; i > 1; i--) {
@@ -51,8 +53,33 @@ public class Utils {
      * Code from method java.util.Collections.swap();
      */
     private static void swap(int[] array, int i, int j) {
+
         int temp = array[i];
         array[i] = array[j];
         array[j] = temp;
+    }
+
+    public static ItemStack removeAttributes(ItemStack i) {
+
+        if(i == null || i.getType() == Material.BOOK_AND_QUILL)
+            return i;
+
+        ItemStack item = i.clone();
+
+        net.minecraft.server.v1_10_R1.ItemStack nmsStack = CraftItemStack.asNMSCopy(item);
+        NBTTagCompound tag;
+
+        if (!nmsStack.hasTag()) {
+            tag = new NBTTagCompound();
+            nmsStack.setTag(tag);
+        } else
+            tag = nmsStack.getTag();
+
+        NBTTagList am = new NBTTagList();
+
+        tag.set("AttributeModifiers", am);
+        nmsStack.setTag(tag);
+
+        return CraftItemStack.asBukkitCopy(nmsStack);
     }
 }
