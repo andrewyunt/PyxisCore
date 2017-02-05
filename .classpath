@@ -3,7 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="C:/Users/Andrew/Desktop/Jars/Vault.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Andrew/Desktop/Jars/spigot-1.9.4.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Andrew/workspace/lib/Towny.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Desktop/Jars/worldguard-6.0.0-beta-03.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Desktop/Jars/spigot-1.10.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
