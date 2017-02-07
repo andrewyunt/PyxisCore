@@ -2,6 +2,7 @@ package com.andrewyunt.pyxiscore;
 
 import com.andrewyunt.pyxiscore.listeners.PlayerEventListener;
 import com.andrewyunt.pyxiscore.listeners.TownyEventListener;
+import com.andrewyunt.pyxiscore.listeners.WorldGuardEventListener;
 import com.andrewyunt.pyxiscore.menus.PathsMenuGUI;
 import com.andrewyunt.pyxiscore.player.PlayerManager;
 import com.andrewyunt.pyxiscore.player.PyxisPlayer;
@@ -43,6 +44,7 @@ public class PyxisCore extends JavaPlugin {
 		// Register plugin specific events
 		getServer().getPluginManager().registerEvents(new PlayerEventListener(), this);
 		getServer().getPluginManager().registerEvents(new TownyEventListener(), this);
+		getServer().getPluginManager().registerEvents(new WorldGuardEventListener(), this);
 		
 		getServer().addRecipe(Recipes.getIceLanceSpellRecipe());
 		getServer().addRecipe(Recipes.getLightningSpellRecipe());

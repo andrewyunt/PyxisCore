@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="C:/Users/Andrew/workspace/lib/Towny.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Andrew/Desktop/Jars/worldguard-6.0.0-beta-03.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Andrew/Desktop/Jars/spigot-1.10.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Desktop/Jars/WorldEdit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -3,12 +3,16 @@ package com.andrewyunt.pyxiscore.utilities;
 import net.minecraft.server.v1_10_R1.NBTTagCompound;
 import net.minecraft.server.v1_10_R1.NBTTagList;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -79,5 +83,32 @@ public class Utils {
 		nmsStack.setTag(tag);
 		
 		return CraftItemStack.asBukkitCopy(nmsStack);
+	}
+	
+	/**
+	 * @author Quackster
+	 */
+	public static Set<Block> getBlocksBetweenTwoPoints(Location loc1, Location loc2) {
+
+		Set<Block> blocks = new HashSet<Block>();
+
+		int topBlockX = (loc1.getBlockX() < loc2.getBlockX() ? loc2.getBlockX() : loc1.getBlockX());
+		int bottomBlockX = (loc1.getBlockX() > loc2.getBlockX() ? loc2.getBlockX() : loc1.getBlockX());
+
+		int topBlockY = (loc1.getBlockY() < loc2.getBlockY() ? loc2.getBlockY() : loc1.getBlockY());
+		int bottomBlockY = (loc1.getBlockY() > loc2.getBlockY() ? loc2.getBlockY() : loc1.getBlockY());
+
+		int topBlockZ = (loc1.getBlockZ() < loc2.getBlockZ() ? loc2.getBlockZ() : loc1.getBlockZ());
+		int bottomBlockZ = (loc1.getBlockZ() > loc2.getBlockZ() ? loc2.getBlockZ() : loc1.getBlockZ());
+
+		for (int x = bottomBlockX; x <= topBlockX; x++)
+			for (int z = bottomBlockZ; z <= topBlockZ; z++)
+				for (int y = bottomBlockY; y <= topBlockY; y++) {
+					Block block = loc1.getWorld().getBlockAt(x, y, z);
+
+					blocks.add(block);
+				}
+
+		return blocks;
 	}
 }
